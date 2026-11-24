@@ -1,0 +1,354 @@
+{
+  "scope": "Google round-trip completion, domestic CNF-REC, economy BRL; no booking or purchase",
+  "live_runs": [
+    {
+      "input": {
+        "origins": [
+          "CNF"
+        ],
+        "destinations": [
+          "REC"
+        ],
+        "departure_date": "2027-03-10",
+        "return_date": "2027-03-17",
+        "passengers": {
+          "adults": 2
+        },
+        "providers": [
+          "google"
+        ],
+        "max_stops": 2,
+        "max_routes": 1,
+        "cursor": 0
+      },
+      "status": "partial",
+      "finished_at": "2026-11-24T16:43:23.982Z",
+      "sha256": "ceca5564b4f20f3acba420c7614375dcc8187aee529c880d9c6408d01af9fd46",
+      "queries": [
+        {
+          "kind": "round_trip",
+          "status": "partial",
+          "complete": 3,
+          "incomplete": 11,
+          "rejected": 0,
+          "warnings": [
+            "GOOGLE_RETURN_SEARCH_STOPPED: GOOGLE_RPC_ERROR; unexpanded outbound flights remain previews."
+          ],
+          "error": null
+        },
+        {
+          "kind": "outbound_one_way",
+          "status": "ok",
+          "complete": 13,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "kind": "inbound_one_way",
+          "status": "ok",
+          "complete": 10,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        }
+      ],
+      "comparison": {
+        "level": "observed_price_only",
+        "currency": "BRL",
+        "conditions_comparable": false,
+        "exhaustive": false,
+        "round_trip": {
+          "quote_id": "bfc5b40f2eb96bbed15af42c",
+          "total_minor": 303800
+        },
+        "separate": {
+          "outbound_quote_id": "319dc3e3d452008d2e0054d7",
+          "inbound_quote_id": "74fdc634b2d81f04d907b8a7",
+          "total_minor": 303600,
+          "separate_bookings": true
+        },
+        "round_trip_minus_separate_minor": 200,
+        "lower_observed_price": "separate",
+        "warning": "Prices may have different payment, baggage, connection and refund conditions. No global minimum or booking availability is guaranteed."
+      }
+    },
+    {
+      "input": {
+        "origins": [
+          "CNF"
+        ],
+        "destinations": [
+          "REC"
+        ],
+        "departure_date": "2027-03-10",
+        "return_date": "2027-03-17",
+        "passengers": {
+          "adults": 1
+        },
+        "providers": [
+          "google"
+        ],
+        "max_stops": 2,
+        "max_routes": 1,
+        "cursor": 0
+      },
+      "status": "partial",
+      "finished_at": "2026-11-24T16:43:24.495Z",
+      "sha256": "bddbaa2151a1caf7fd50191614d059de7cd56855185aea99392a7b172ef74ae8",
+      "queries": [
+        {
+          "kind": "round_trip",
+          "status": "error",
+          "complete": 0,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": {
+            "code": "GOOGLE_RPC_ERROR",
+            "message": "GOOGLE_RPC_ERROR: Google Flights returned ErrorResponse (13)."
+          }
+        },
+        {
+          "kind": "outbound_one_way",
+          "status": "ok",
+          "complete": 15,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "kind": "inbound_one_way",
+          "status": "ok",
+          "complete": 10,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        }
+      ],
+      "comparison": {
+        "level": "observed_price_only",
+        "currency": "BRL",
+        "conditions_comparable": false,
+        "exhaustive": false,
+        "round_trip": null,
+        "separate": {
+          "outbound_quote_id": "c21c27cbe654e689ac1395ad",
+          "inbound_quote_id": "d559d77cec25d6faf23c61d6",
+          "total_minor": 151800,
+          "separate_bookings": true
+        },
+        "round_trip_minus_separate_minor": null,
+        "lower_observed_price": null,
+        "warning": "Prices may have different payment, baggage, connection and refund conditions. No global minimum or booking availability is guaranteed."
+      }
+    },
+    {
+      "input": {
+        "origins": [
+          "CNF"
+        ],
+        "destinations": [
+          "REC"
+        ],
+        "departure_date": "2027-03-10",
+        "return_date": "2027-03-17",
+        "passengers": {
+          "adults": 2
+        },
+        "providers": [
+          "google"
+        ],
+        "max_stops": 0,
+        "max_routes": 1,
+        "cursor": 0
+      },
+      "status": "ok",
+      "finished_at": "2026-11-24T16:44:46.780Z",
+      "sha256": "bf728a0fa7234544ccb9b1fa56fe43d4b4cb7bbb5736bb1b9c5b08b13aec7fd4",
+      "queries": [
+        {
+          "kind": "round_trip",
+          "status": "ok",
+          "complete": 16,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "kind": "outbound_one_way",
+          "status": "ok",
+          "complete": 4,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "kind": "inbound_one_way",
+          "status": "ok",
+          "complete": 4,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        }
+      ],
+      "comparison": {
+        "level": "observed_price_only",
+        "currency": "BRL",
+        "conditions_comparable": false,
+        "exhaustive": false,
+        "round_trip": {
+          "quote_id": "d913f964ffea6d0e4c7b65c0",
+          "total_minor": 311900
+        },
+        "separate": {
+          "outbound_quote_id": "e2e51cbe414a417961c1f6b6",
+          "inbound_quote_id": "acd68b7e00c5fb945cceed6f",
+          "total_minor": 324500,
+          "separate_bookings": true
+        },
+        "round_trip_minus_separate_minor": -12600,
+        "lower_observed_price": "round_trip",
+        "warning": "Prices may have different payment, baggage, connection and refund conditions. No global minimum or booking availability is guaranteed."
+      }
+    },
+    {
+      "input": {
+        "origins": [
+          "CNF"
+        ],
+        "destinations": [
+          "REC"
+        ],
+        "departure_date": "2027-03-10",
+        "return_date": "2027-03-17",
+        "passengers": {
+          "adults": 1
+        },
+        "providers": [
+          "google"
+        ],
+        "max_stops": 0,
+        "max_routes": 1,
+        "cursor": 0
+      },
+      "status": "partial",
+      "finished_at": "2026-11-24T16:44:48.071Z",
+      "sha256": "e571b0550ecefb090fcf5dfd7723385e272aa34ec521db571ddf3ba99abcb1ec",
+      "queries": [
+        {
+          "kind": "round_trip",
+          "status": "ok",
+          "complete": 16,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "kind": "outbound_one_way",
+          "status": "ok",
+          "complete": 4,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "kind": "inbound_one_way",
+          "status": "error",
+          "complete": 0,
+          "incomplete": 0,
+          "rejected": 0,
+          "warnings": [],
+          "error": {
+            "code": "GOOGLE_RPC_ERROR",
+            "message": "GOOGLE_RPC_ERROR: Google Flights returned ErrorResponse (13)."
+          }
+        }
+      ],
+      "comparison": {
+        "level": "observed_price_only",
+        "currency": "BRL",
+        "conditions_comparable": false,
+        "exhaustive": false,
+        "round_trip": {
+          "quote_id": "4e0ce2e97ff944745df8439b",
+          "total_minor": 156000
+        },
+        "separate": null,
+        "round_trip_minus_separate_minor": null,
+        "lower_observed_price": null,
+        "warning": "Prices may have different payment, baggage, connection and refund conditions. No global minimum or booking availability is guaranteed."
+      }
+    }
+  ],
+  "browser_matched_quote": {
+    "id": "d913f964ffea6d0e4c7b65c0",
+    "source": "google",
+    "retrieved_at": "2026-11-24T16:44:46.428Z",
+    "price": {
+      "amount_minor": 311900,
+      "currency": "BRL",
+      "scope": "all_passengers",
+      "adults": 2
+    },
+    "itinerary": {
+      "outbound": [
+        {
+          "from": "CNF",
+          "to": "REC",
+          "departure": "2027-03-10T12:55:00",
+          "arrival": "2027-03-10T15:20:00",
+          "carrier": "AD"
+        }
+      ],
+      "inbound": [
+        {
+          "from": "REC",
+          "to": "CNF",
+          "departure": "2027-03-17T02:40:00",
+          "arrival": "2027-03-17T05:15:00",
+          "carrier": "AD"
+        }
+      ],
+      "complete": true,
+      "time_basis": "airport_local"
+    },
+    "airlines": [
+      "AD"
+    ],
+    "conditions": {
+      "cabin": "ECONOMY",
+      "checked_bags": null,
+      "payment": "unspecified",
+      "taxes_included": null,
+      "transfer_protection": "unknown"
+    },
+    "comparison_eligible": true,
+    "booking_confirmed": false,
+    "link": null,
+    "warnings": [
+      "Google shopping total for the selected pair; booking sellers may quote different prices or conditions."
+    ]
+  },
+  "browser_observations": {
+    "adults": 2,
+    "outbound_flight": "AD4890",
+    "inbound_flight": "AD4605",
+    "google_shopping_pair_total_minor": 311900,
+    "booking_options": {
+      "Azul": 311900,
+      "MaxMilhas": 256900,
+      "Decolar": 259100
+    },
+    "note": "Booking seller prices shown for context; collector uses shopping-stage total, not minimum across sellers."
+  }
+}

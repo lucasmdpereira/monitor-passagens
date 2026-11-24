@@ -27,7 +27,7 @@ const ALLOWED_CARRIERS = new Set(['AD', 'G3', 'LA', 'JJ']);
 const minor = (amount: number) => Math.round(amount * 100);
 
 export function safeDiagnostic(message: string): string {
-  const http = /HTTP\s+(\d{3})/.exec(message);
+  const http = /\bHTTP\s+(\d{3})\b/.exec(message);
   if (http) return `${/^maxmilhas\/[a-z]+:/.exec(message)?.[0] ?? 'Provider:'} HTTP ${http[1]}`;
   return message.replace(/https?:\/\/\S+/g, '[URL]')
     .replace(/((?:token|password|secret|authorization)\s*[=:]\s*)[^\s,;}]+/gi, '$1[redacted]').slice(0, 280);
@@ -39,6 +39,10 @@ function validTimestamp(value: unknown): value is string {
   if (!match || Number(match[2]) > 23 || Number(match[3]) > 59 || Number(match[4] ?? 0) > 59 || !Number.isFinite(Date.parse(value))) return false;
   const day = new Date(`${match[1]}T00:00:00Z`);
   return Number.isFinite(day.getTime()) && day.toISOString().slice(0, 10) === match[1];
+}
+
+function completeGoogleRoundTrip(raw: any, query: SearchQuery): boolean {
+  return Boolean(query.returnDate) && raw.itinerary_complete === true && raw.price_scope === 'round_trip_total';
 }
 
 function extractSegments(provider: ProviderName, raw: any, query: SearchQuery): [Segment[], Segment[], (number | null)?] {
@@ -76,7 +80,17 @@ function extractSegments(provider: ProviderName, raw: any, query: SearchQuery): 
       ? Math.min(...selected.map(s => s.bound.hasCheckedBags ? 1 : 0)) : null;
     return [out.segments, back?.segments ?? [], checked];
   }
-  return [raw.segments ?? [], []];
+  if (!Array.isArray(raw.segments)) throw new Error('Missing Google outbound itinerary evidence');
+  const complete = completeGoogleRoundTrip(raw, query);
+  if (complete && !Array.isArray(raw.inbound_segments)) throw new Error('Missing Google return itinerary evidence');
+  if (!query.returnDate && (raw.price_scope === 'round_trip_total' || (Array.isArray(raw.inbound_segments) && raw.inbound_segments.length > 0))) {
+    throw new Error('A Google round-trip total cannot be used for a one-way query');
+  }
+  if (!query.returnDate && (raw.price_scope !== 'one_way_total' || raw.itinerary_complete !== true)) {
+    throw new Error('Google one-way price scope and itinerary completeness must be confirmed');
+  }
+  // Preview metadata cannot promote an unvalidated return or expose it as selected.
+  return [raw.segments, complete ? raw.inbound_segments : []];
 }
 
 function validateSector(segments: Segment[], from: string, to: string, date: string, maxStops: number) {
@@ -99,7 +113,7 @@ export function normalizeQuote(source: ProviderName, offer: Offer, query: Search
   if (!raw || typeof raw !== 'object') throw new Error('Missing itinerary evidence');
   const [outbound, inbound, selectedBaggage] = extractSegments(source, raw, query);
   validateSector(outbound, query.origin, query.destination, query.departDate, query.maxStops ?? 2);
-  const preview = source === 'google' && Boolean(query.returnDate);
+  const preview = source === 'google' && Boolean(query.returnDate) && !completeGoogleRoundTrip(raw, query);
   if (query.returnDate && !preview) validateSector(inbound, query.destination, query.origin, query.returnDate, query.maxStops ?? 2);
   if (source === 'maxmilhas') {
     const units = raw.priceDetails?.unitPrices;
@@ -114,6 +128,7 @@ export function normalizeQuote(source: ProviderName, offer: Offer, query: Search
   const pix = discounts.some((d: any) => /pix/i.test(`${d.label ?? ''} ${d.name ?? ''}`));
   const warnings = (offer.warnings ?? []).map(safeDiagnostic);
   if (preview) warnings.push('Return flight is not selected: Google round-trip price is indicative and excluded from comparisons.');
+  if (source === 'google' && query.returnDate && !preview) warnings.push('Google shopping total for the selected pair; booking sellers may quote different prices or conditions.');
   if (source === 'kiwi') warnings.push('Connections may involve separate tickets; transfer protection is not verified.');
   if (source === 'maxmilhas') warnings.push('Provider timestamps retain their original format; displayed local times may carry a Z suffix.');
   if (source === 'maxmilhas' && raw.bounds.length > (query.returnDate ? 2 : 1)) warnings.push('One valid alternative per direction was selected from a grouped fare; other combinations were not independently validated.');

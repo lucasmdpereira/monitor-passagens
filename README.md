@@ -2,7 +2,7 @@
 
 Fork enxuto de [ManoelDiniz/monitor-passagens](https://github.com/ManoelDiniz/monitor-passagens), focado em buscar passagens nacionais operadas por **GOL, LATAM e Azul** através de **Kiwi, MaxMilhas e Google Flights**. Os provedores consultam endpoints usados pelos sites; não precisam de navegador nem de chaves na configuração testada.
 
-A entrada é um objeto JSON. Cada rota gera três consultas por provedor: ida e volta juntas, somente ida e somente volta. A saída preserva preços em centavos para o grupo inteiro, itinerários, condições conhecidas e erros por consulta.
+A entrada é um objeto JSON. Cada rota gera três buscas por provedor: ida e volta juntas, somente ida e somente volta. No Google, a busca de ida e volta usa uma consulta inicial e consultas adicionais para obter as voltas de cada ida selecionada. A saída preserva preços em centavos para o grupo inteiro, itinerários, condições conhecidas e erros por consulta.
 
 ## Executar
 
@@ -58,7 +58,11 @@ As consultas rodam sequencialmente. Cada requisição tem timeout incluindo o co
 
 A Kiwi pode combinar companhias e bilhetes separados; proteção de conexão não foi validada. Tokens opacos de reserva não são exportados: o link da Kiwi fica nulo. A MaxMilhas mantém o link público com datas e quantidade de adultos. Seus horários conservam o formato recebido, mas o fuso é marcado como não confirmado: o site mostra horários locais mesmo quando o BFF adiciona `Z`.
 
-O Google Flights fornece, em ida e volta, um preço preliminar com detalhes somente da ida. Essas ofertas aparecem como incompletas e **não participam da comparação**. Erros internos de RPC são erros explícitos, mesmo quando o HTTP retorna 200. Os links Google ficam nulos porque o link original não preservava os passageiros.
+O Google Flights completa a busca de ida e volta em duas etapas: lista as idas e consulta as voltas fixando todos os segmentos de cada ida. O preço da segunda etapa é o total do par para os adultos solicitados; não é somado ao preço preliminar. Apenas pares com volta válida entram na comparação.
+
+A expansão é sequencial, prioriza os menores preços preliminares e consulta até **20 idas distintas** por rota. Idas não expandidas ou com falha conservam o preço preliminar, `itinerary.complete: false` e `comparison_eligible: false`, com o motivo registrado. Falhas de transporte, RPC ou estrutura interrompem a expansão para evitar repetir uma consulta defeituosa. HTTP 403/429 também interrompe as buscas restantes ao Google no lote.
+
+O total Google corresponde à etapa de pesquisa do par escolhido. As opções finais de vendedores podem oferecer preços e condições diferentes; não consultamos todas essas opções nem validamos checkout. Erros internos de RPC são explícitos, mesmo com HTTP 200. Os links Google ficam nulos porque o link original não preservava os passageiros.
 
 Os endpoints internos podem mudar sem aviso. Falha ou resposta incompatível nunca deve ser interpretada como tarifa zero ou ausência comprovada de voos.
 
@@ -70,7 +74,7 @@ npm run typecheck
 npm run build
 ```
 
-Os testes usam respostas reduzidas e saneadas, além de cenários de erro. As consultas reais são separadas dos testes automatizados. Veja [a validação de 24/11/2026](docs/validation/2026-11-24.md).
+Os testes usam respostas reduzidas e saneadas, além de cenários de erro. As consultas reais são separadas dos testes automatizados. Veja [a validação inicial de 24/11/2026](docs/validation/2026-11-24.md) e [a correção do RT Google](docs/validation/2026-11-24-google-rt.md).
 
 Não há painel, banco, notificações, execução agendada ou integração n8n nesta versão. A saída JSON é o ponto de integração futuro. O trabalho anterior em `flight-deals-agent` permanece independente.
 

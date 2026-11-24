@@ -2,8 +2,8 @@ import { fetchText, Offer, PriceProvider, ProviderError, SearchQuery } from './t
 
 /**
  * Google Flights uses an undocumented positional RPC response.
- * A round-trip search returns outbound candidates and a preliminary pair price;
- * the return itinerary is not selected here and must never be marked complete.
+ * Round trips first return outbound previews. Follow-up searches bind every
+ * outbound segment before collecting the return options and their pair totals.
  */
 
 const ENDPOINT =
@@ -14,6 +14,8 @@ const UA =
 const TRIP = { roundTrip: 1, oneWay: 2 };
 const ECONOMY = 1;
 const ORDEM_MELHORES = 1;
+const MAX_RETURN_SEARCHES = 20;
+type SelectedLeg = [string, string, string, null, string, string];
 
 /** Qualquer numero de paradas; o Google usa 1 = direto, 2 = ate 1, 3 = ate 2. */
 function stopsFilter(maxStops?: number): number {
@@ -42,14 +44,15 @@ function segment(from: string, to: string, date: string, maxStops?: number): unk
 }
 
 /** O corpo e um JSON posicional, serializado duas vezes, dentro de um form. */
-function requestBody(query: SearchQuery): string {
+function requestBody(query: SearchQuery, selected?: SelectedLeg[], summaryToken?: string): string {
   const segments = [segment(query.origin, query.destination, query.departDate, query.maxStops)];
   if (query.returnDate) {
     segments.push(segment(query.destination, query.origin, query.returnDate, query.maxStops));
   }
+  if (selected) segments[0][8] = selected;
 
   const filters = [
-    [],
+    selected && summaryToken ? [null, summaryToken] : [],
     [
       null,
       null,
@@ -70,10 +73,10 @@ function requestBody(query: SearchQuery): string {
       null,
       1,
     ],
-    ORDEM_MELHORES,
+    selected ? 0 : ORDEM_MELHORES,
     0,
     0,
-    2,
+    selected ? 1 : 2,
   ];
 
   return `f.req=${encodeURIComponent(JSON.stringify([null, JSON.stringify(filters)]))}`;
@@ -214,6 +217,103 @@ function toOffer(raw: any, query: SearchQuery): Offer {
   };
 }
 
+interface GoogleRaw {
+  flights: string[];
+  segments: ObservedSegment[];
+  inbound_segments?: ObservedSegment[];
+  query_adults: number;
+  itinerary_complete: boolean;
+  price_scope: string;
+}
+
+/** Airport-local clocks are comparable at connections, which share an airport. */
+function validateItinerary(segments: ObservedSegment[], from: string, to: string, date: string): void {
+  if (!segments.length || segments[0].from !== from || segments.at(-1)!.to !== to
+      || segments[0].departure.slice(0, 10) !== date) {
+    throw responseError('GOOGLE_INVALID_OFFER', 'The itinerary does not match the requested route and date.');
+  }
+  for (const [index, current] of segments.entries()) {
+    if (current.arrival.slice(0, 10) < current.departure.slice(0, 10)) {
+      throw responseError('GOOGLE_INVALID_OFFER', 'The itinerary has an invalid arrival date.');
+    }
+    if (index && (segments[index - 1].to !== current.from
+        || current.departure < segments[index - 1].arrival)) {
+      throw responseError('GOOGLE_INVALID_OFFER', 'The itinerary has a disconnected or reversed connection.');
+    }
+  }
+}
+
+/** Use only observed flight identifiers; a route alone cannot pin a flight. */
+function selectedLegs(row: any, segments: ObservedSegment[]): SelectedLeg[] {
+  return segments.map((observed, index) => {
+    const identifiers = row?.[0]?.[2]?.[index]?.[22];
+    const airline = identifiers?.[0];
+    const number = identifiers?.[1];
+    if (typeof airline !== 'string' || !/^[A-Z0-9]{2}$/.test(airline)
+        || typeof number !== 'string' || !/^\d{1,4}[A-Z]?$/.test(number)) {
+      throw responseError('GOOGLE_INVALID_OFFER', 'An observed flight identifier is missing or invalid.');
+    }
+    return [observed.from, observed.departure.slice(0, 10), observed.to, null, airline, number];
+  });
+}
+
+async function fetchOffers(query: SearchQuery, selected?: SelectedLeg[], summaryToken?: string): Promise<unknown[]> {
+  let text: string;
+  try {
+    text = await fetchText(`${ENDPOINT}?hl=pt-BR&gl=BR&curr=BRL`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'User-Agent': UA,
+        'Accept-Language': 'pt-BR,pt;q=0.9',
+        Origin: 'https://www.google.com',
+        Referer: 'https://www.google.com/travel/flights',
+      },
+      body: requestBody(query, selected, summaryToken),
+      timeoutMs: 30_000,
+      // A rejected expansion must stop the batch rather than trigger retries.
+      ...(selected ? { retries: 1 } : {}),
+    });
+  } catch (error) {
+    const status = /HTTP\s+(\d{3})/.exec(error instanceof Error ? error.message : '');
+    const code = status && ['403', '429'].includes(status[1]) ? `HTTP_${status[1]}` : 'GOOGLE_TRANSPORT_ERROR';
+    throw responseError(code, status ? `HTTP ${status[1]}` : 'Google Flights transport failed.');
+  }
+  return parseResponse(text);
+}
+
+function stoppedWarning(error: unknown): string {
+  const status = /HTTP\s+(\d{3})/.exec(error instanceof Error ? error.message : '');
+  const code = (error as { code?: unknown } | null)?.code;
+  const reason = status ? `HTTP ${status[1]}` : typeof code === 'string' && /^GOOGLE_[A-Z_]+$/.test(code) ? code : 'GOOGLE_RETURN_ERROR';
+  return `GOOGLE_RETURN_SEARCH_STOPPED: ${reason}; unexpanded outbound flights remain previews.`;
+}
+
+function preview(offer: Offer, warning: string): Offer {
+  return { ...offer, warnings: [...(offer.warnings ?? []), warning] };
+}
+
+function completeOffer(outbound: Offer, inbound: Offer, query: SearchQuery): Offer {
+  const out = outbound.raw as GoogleRaw;
+  const back = inbound.raw as GoogleRaw;
+  return {
+    ...outbound,
+    // A return result carries the whole selected pair's shopping total.
+    price: inbound.price,
+    airline: [...new Set([outbound.airline, inbound.airline].filter(Boolean))].join(' + ') || null,
+    stopsRet: back.segments.length - 1,
+    returnAt: back.segments[0].departure,
+    raw: {
+      flights: [...out.flights, ...back.flights],
+      segments: out.segments,
+      inbound_segments: back.segments,
+      query_adults: query.adults,
+      itinerary_complete: true,
+      price_scope: 'round_trip_total',
+    } satisfies GoogleRaw,
+  };
+}
+
 export const google: PriceProvider = {
   name: 'google',
 
@@ -222,25 +322,77 @@ export const google: PriceProvider = {
   },
 
   async search(query: SearchQuery): Promise<Offer[]> {
-    let text: string;
-    try {
-      text = await fetchText(`${ENDPOINT}?hl=pt-BR&gl=BR&curr=BRL`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-          'User-Agent': UA,
-          'Accept-Language': 'pt-BR,pt;q=0.9',
-          Origin: 'https://www.google.com',
-          Referer: 'https://www.google.com/travel/flights',
-        },
-        body: requestBody(query),
-        timeoutMs: 30_000,
-      });
-    } catch (err) {
-      throw new ProviderError((err as Error).message, 'google');
-    }
+    const rows = await fetchOffers(query);
+    const initial = rows.map(row => ({ row: row as any, offer: toOffer(row, query) }));
+    if (!query.returnDate) return initial.map(candidate => candidate.offer);
 
-    const flights = parseResponse(text);
-    return flights.map(flight => toOffer(flight, query));
+    const results: Offer[] = [];
+    const seen = new Set<string>();
+    let searches = 0;
+    let stopped: string | null = null;
+    for (const { row, offer } of initial.sort((a, b) => a.offer.price - b.offer.price)) {
+      const out = offer.raw as GoogleRaw;
+      let selection: SelectedLeg[];
+      try {
+        validateItinerary(out.segments, query.origin, query.destination, query.departDate);
+        selection = selectedLegs(row, out.segments);
+      } catch {
+        results.push(preview(offer, 'GOOGLE_OUTBOUND_SELECTION_UNAVAILABLE: The outbound itinerary or flight identifiers are invalid.'));
+        continue;
+      }
+      const key = JSON.stringify(selection);
+      if (seen.has(key)) continue;
+      const summaryToken = row?.[1]?.[1];
+      if (typeof summaryToken !== 'string' || !summaryToken) {
+        results.push(preview(offer, 'GOOGLE_OUTBOUND_SELECTION_UNAVAILABLE: The outbound summary token is missing.'));
+        continue;
+      }
+      seen.add(key);
+      if (stopped) {
+        results.push(preview(offer, stopped));
+        continue;
+      }
+      if (searches >= MAX_RETURN_SEARCHES) {
+        results.push(preview(offer, `GOOGLE_RETURN_SEARCH_CAP: Only ${MAX_RETURN_SEARCHES} distinct outbound flights were expanded; this flight remains a preview.`));
+        continue;
+      }
+      let returns: unknown[];
+      searches += 1;
+      try {
+        returns = await fetchOffers(query, selection, summaryToken);
+      } catch (error) {
+        stopped = stoppedWarning(error);
+        results.push(preview(offer, stopped));
+        continue;
+      }
+      const completed: Offer[] = [];
+      let discarded = 0;
+      for (const returned of returns) {
+        try {
+          const inbound = toOffer(returned, query);
+          const back = inbound.raw as GoogleRaw;
+          validateItinerary(back.segments, query.destination, query.origin, query.returnDate);
+          selectedLegs(returned, back.segments);
+          if (back.segments[0].departure < out.segments.at(-1)!.arrival) {
+            throw responseError('GOOGLE_INVALID_OFFER', 'The return departs before the outbound arrival.');
+          }
+          completed.push(completeOffer(offer, inbound, query));
+        } catch (error) {
+          discarded += 1;
+          if ((error as { code?: string })?.code === 'GOOGLE_RESPONSE_SCHEMA_CHANGED') stopped = stoppedWarning(error);
+        }
+      }
+      const warning = discarded ? `GOOGLE_INVALID_RETURN_OPTIONS: ${discarded} return options were discarded; coverage is incomplete.` : null;
+      if (completed.length) {
+        for (const complete of completed) {
+          if (warning) complete.warnings = [warning];
+          if (stopped) complete.warnings = [...(complete.warnings ?? []), stopped];
+          results.push(complete);
+        }
+      } else {
+        results.push(preview(offer, stopped ?? warning ?? 'GOOGLE_RETURN_OPTIONS_UNAVAILABLE: No return options were returned; this flight remains a preview.'));
+      }
+    }
+    return results;
   },
 };

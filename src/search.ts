@@ -38,7 +38,7 @@ interface QueryResult {
 function failure(error: unknown) {
   const e = error as any;
   const message = error instanceof Error ? error.message : 'Unknown provider failure';
-  const http = /HTTP\s+(\d{3})/.exec(message)?.[1];
+  const http = /\bHTTP\s+(\d{3})\b/.exec(message)?.[1];
   const code = e?.code ?? (http ? `HTTP_${http}` : e?.name === 'AbortError' ? 'TIMEOUT' : 'PROVIDER_ERROR');
   // HTTP bodies can contain identifiers. Keep diagnostics useful without persisting them.
   return { code: String(code), message: http ? `Provider returned HTTP ${http}` : safeDiagnostic(message) };
@@ -68,23 +68,30 @@ export async function searchFlights(input: unknown, dependencies: { providers?: 
           const offers = await providers[providerName].search(query);
           const retrieved = now().toISOString();
           entry.received_offers = offers.length;
+          // Provider failures remain relevant even if the carrying offer is later rejected.
+          const providerWarnings = offers.flatMap(offer => offer.warnings ?? []);
+          entry.warnings.push(...providerWarnings.map(safeDiagnostic));
+          const blockedHttp = providerWarnings.map(warning => /\bHTTP\s+(\d{3})\b/.exec(warning)?.[1])
+            .find(status => status === '403' || status === '429');
+          if (blockedHttp) blockedSources.add(providerName);
           const seen = new Set<string>();
           for (const offer of offers) {
             try {
               const normalized = normalizeQuote(providerName, offer, query, retrieved);
               if (!seen.has(normalized.id)) entry.offers.push(normalized);
               seen.add(normalized.id);
-              entry.warnings.push(...(offer.warnings ?? []).map(safeDiagnostic));
             } catch (error) {
               entry.rejected_offers++;
-              entry.warnings.push(error instanceof Error ? error.message : 'Invalid offer');
+              entry.warnings.push(safeDiagnostic(error instanceof Error ? error.message : 'Invalid offer'));
             }
           }
           entry.offers.sort((a, b) => a.price.amount_minor - b.price.amount_minor);
           entry.warnings = [...new Set(entry.warnings)];
-          entry.status = !entry.offers.length ? (offers.length ? 'error' : 'empty')
+          entry.status = !entry.offers.length ? (blockedHttp ? 'blocked' : offers.length ? 'error' : 'empty')
             : entry.rejected_offers || entry.warnings.length || entry.offers.some(o => !o.comparison_eligible) ? 'partial' : 'ok';
-          if (offers.length && !entry.offers.length) entry.error = { code: 'NO_VALID_OFFERS', message: 'All returned offers failed itinerary or price validation' };
+          if (offers.length && !entry.offers.length) entry.error = blockedHttp
+            ? { code: `HTTP_${blockedHttp}`, message: `Provider returned HTTP ${blockedHttp}; no valid offers remain` }
+            : { code: 'NO_VALID_OFFERS', message: 'All returned offers failed itinerary or price validation' };
         } catch (error) {
           entry.error = failure(error);
           entry.status = ['HTTP_403', 'HTTP_429'].includes(entry.error.code) ? 'blocked' : 'error';
