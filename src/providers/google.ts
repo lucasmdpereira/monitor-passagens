@@ -1,17 +1,9 @@
 import { fetchText, Offer, PriceProvider, ProviderError, SearchQuery } from './types';
 
 /**
- * Google Flights — endpoint RPC interno que a propria pagina do Google Voos usa.
- *
- * Nao exige cadastro nem chave. Os sites da LATAM, Azul e GOL barram robos
- * (Akamai, 403 na primeira chamada), mas o Google mostra as tarifas publicadas
- * por essas mesmas companhias — e costuma achar preco que Kiwi e MaxMilhas nao
- * trazem. Como e endpoint interno, o formato posicional abaixo pode mudar sem
- * aviso; todo o acoplamento com o Google esta neste arquivo.
- *
- * Em ida-e-volta o preco devolvido ja e o total do par, mas a lista traz so as
- * opcoes de ida — escolher a volta exigiria uma segunda chamada por oferta.
- * Por isso `returnAt` fica nulo aqui.
+ * Google Flights uses an undocumented positional RPC response.
+ * A round-trip search returns outbound candidates and a preliminary pair price;
+ * the return itinerary is not selected here and must never be marked complete.
  */
 
 const ENDPOINT =
@@ -87,54 +79,138 @@ function requestBody(query: SearchQuery): string {
   return `f.req=${encodeURIComponent(JSON.stringify([null, JSON.stringify(filters)]))}`;
 }
 
-/** Resposta comeca com ")]}'" para impedir execucao como script; o payload vem serializado dentro. */
-function parseResponse(text: string): any[] {
-  const outer = JSON.parse(text.replace(/^\)\]\}'/, ''));
-  const inner = outer?.[0]?.[2];
-  if (typeof inner !== 'string') {
-    throw new ProviderError('resposta sem resultados (o Google pode ter mudado o formato)', 'google');
+function responseError(code: string, message: string, rpcCode?: number): ProviderError {
+  return Object.assign(new ProviderError(`${code}: ${message}`, 'google'), {
+    code,
+    ...(rpcCode === undefined ? {} : { rpcCode }),
+  });
+}
+
+/** Decode the observed response envelope without exposing opaque RPC payloads. */
+function parseResponse(text: string): unknown[] {
+  let outer: unknown;
+  try {
+    outer = JSON.parse(text.replace(/^\)\]\}'/, ''));
+  } catch {
+    throw responseError('GOOGLE_RESPONSE_UNREADABLE', 'The response is not a readable JSON envelope.');
   }
-  const data = JSON.parse(inner);
-  // [2] = "melhores voos", [3] = "outros voos"; qualquer um pode faltar.
-  return [2, 3].flatMap((i) => (Array.isArray(data?.[i]?.[0]) ? data[i][0] : []));
+  if (!Array.isArray(outer) || !Array.isArray(outer[0]) || outer[0][0] !== 'wrb.fr') {
+    throw responseError('GOOGLE_RESPONSE_SCHEMA_CHANGED', 'The expected RPC envelope is absent.');
+  }
+  for (const frame of outer) {
+    if (!Array.isArray(frame) || frame[0] !== 'wrb.fr' || !Array.isArray(frame[5])) continue;
+    const rpcCode = frame[5][0];
+    if (Number.isInteger(rpcCode) && rpcCode !== 0) {
+      throw responseError('GOOGLE_RPC_ERROR', `Google Flights returned ErrorResponse (${rpcCode}).`, rpcCode);
+    }
+    throw responseError('GOOGLE_RESPONSE_SCHEMA_CHANGED', 'An unrecognized RPC error envelope was returned.');
+  }
+  const inner = outer[0][2];
+  if (typeof inner !== 'string') {
+    throw responseError('GOOGLE_RESPONSE_SCHEMA_CHANGED', 'The expected serialized result is absent.');
+  }
+  let data: unknown;
+  try { data = JSON.parse(inner); } catch {
+    throw responseError('GOOGLE_RESPONSE_UNREADABLE', 'The serialized result is not readable JSON.');
+  }
+  if (!Array.isArray(data)) {
+    throw responseError('GOOGLE_RESPONSE_SCHEMA_CHANGED', 'The result is not the expected positional array.');
+  }
+  const flights: unknown[] = [];
+  let recognizedGroups = 0;
+  // Both groups were observed; one may be absent, but absent groups are not proof of zero results.
+  for (const index of [2, 3]) {
+    const group = data[index];
+    if (group === null || group === undefined) continue;
+    if (!Array.isArray(group) || !Array.isArray(group[0])) {
+      throw responseError('GOOGLE_RESPONSE_SCHEMA_CHANGED', 'A flight-results group has an unexpected shape.');
+    }
+    recognizedGroups += 1;
+    flights.push(...group[0]);
+  }
+  if (recognizedGroups === 0) {
+    throw responseError('GOOGLE_RESPONSE_SCHEMA_CHANGED', 'No recognized flight-results group was returned.');
+  }
+  return flights;
 }
 
-const pad = (n: unknown) => String(n ?? 0).padStart(2, '0');
+const pad = (n: number) => String(n).padStart(2, '0');
 
-/** Data vem como [2026, 11, 6] e hora como [5] ou [null, 40] — zeros sao omitidos. */
-function localTime(date: unknown, time: unknown): string | null {
-  if (!Array.isArray(date) || date.length < 3) return null;
-  const [h, m] = Array.isArray(time) ? time : [];
-  return `${date[0]}-${pad(date[1])}-${pad(date[2])}T${pad(h)}:${pad(m)}:00`;
+/** Zero hour/minute components may be omitted inside an observed time array. */
+function localTime(date: unknown, time: unknown): string {
+  if (!Array.isArray(date) || date.length !== 3 || !date.every(Number.isInteger)
+      || date[0] < 1000 || date[0] > 9999 || !Array.isArray(time) || time.length > 2) {
+    throw responseError('GOOGLE_INVALID_OFFER', 'A segment date or time is absent or malformed.');
+  }
+  const [hours = 0, minutes = 0] = time.map(value => value ?? 0);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+    throw responseError('GOOGLE_INVALID_OFFER', 'A segment time is invalid.');
+  }
+  const day = `${date[0]}-${pad(date[1])}-${pad(date[2])}`;
+  const timestamp = Date.parse(`${day}T00:00:00.000Z`);
+  if (!Number.isFinite(timestamp) || new Date(timestamp).toISOString().slice(0, 10) !== day) {
+    throw responseError('GOOGLE_INVALID_OFFER', 'A segment calendar date is invalid.');
+  }
+  return `${day}T${pad(hours)}:${pad(minutes)}:00`;
 }
 
-function searchLink(query: SearchQuery): string {
-  const q = query.returnDate
-    ? `Flights from ${query.origin} to ${query.destination} on ${query.departDate} through ${query.returnDate}`
-    : `Flights from ${query.origin} to ${query.destination} on ${query.departDate} oneway`;
-  return `https://www.google.com/travel/flights?hl=pt-BR&curr=BRL&q=${encodeURIComponent(q)}`;
+interface ObservedSegment {
+  from: string;
+  to: string;
+  departure: string;
+  arrival: string;
+  carrier: string | null;
 }
 
-function toOffer(raw: any, link: string): Offer | null {
-  const price = raw?.[1]?.[0]?.at?.(-1);
-  const legs: any[] = raw?.[0]?.[2] ?? [];
-  if (typeof price !== 'number' || price <= 0 || legs.length === 0) return null;
-
-  const airlines: string[] = raw[0][1] ?? [];
-
+function observedSegment(leg: any): ObservedSegment {
+  if (!Array.isArray(leg) || typeof leg[3] !== 'string' || !/^[A-Z]{3}$/.test(leg[3])
+      || typeof leg[6] !== 'string' || !/^[A-Z]{3}$/.test(leg[6])) {
+    throw responseError('GOOGLE_INVALID_OFFER', 'A segment airport is absent or malformed.');
+  }
   return {
-    // Total da busca: ja considera todos os adultos e, em ida-e-volta, o par.
+    from: leg[3], to: leg[6],
+    departure: localTime(leg[20], leg[8]), arrival: localTime(leg[21], leg[10]),
+    carrier: typeof leg[22]?.[0] === 'string' ? leg[22][0] : null,
+  };
+}
+
+function toOffer(raw: any, query: SearchQuery): Offer {
+  const amount = raw?.[1]?.[0];
+  if (!Array.isArray(amount) || amount.length !== 2 || amount[0] !== null) {
+    throw responseError('GOOGLE_RESPONSE_SCHEMA_CHANGED', 'The price field has an unexpected shape.');
+  }
+  const price = amount[1];
+  if (typeof price !== 'number' || !Number.isFinite(price) || price <= 0) {
+    throw responseError('GOOGLE_INVALID_OFFER', 'The price is not a positive finite number.');
+  }
+  const legs = raw?.[0]?.[2];
+  if (!Array.isArray(legs) || legs.length === 0) {
+    throw responseError('GOOGLE_INVALID_OFFER', 'The outbound itinerary has no observed segments.');
+  }
+  const segments = legs.map(observedSegment);
+  const airlines = raw?.[0]?.[1];
+  if (airlines != null && (!Array.isArray(airlines) || !airlines.every(name => typeof name === 'string'))) {
+    throw responseError('GOOGLE_RESPONSE_SCHEMA_CHANGED', 'The airline field has an unexpected shape.');
+  }
+  return {
     price,
     currency: 'BRL',
-    airline: airlines.length ? airlines.join(' + ') : (legs[0]?.[22]?.[3] ?? null),
+    airline: airlines?.length ? airlines.join(' + ') : (typeof legs[0]?.[22]?.[3] === 'string' ? legs[0][22][3] : null),
     cabin: 'ECONOMY',
     checkedBags: null,
-    stopsOut: legs.length - 1,
+    stopsOut: segments.length - 1,
     stopsRet: null,
-    departAt: localTime(legs[0]?.[20], legs[0]?.[8]),
+    departAt: segments[0].departure,
     returnAt: null,
-    link,
-    raw: { flights: legs.map((l) => `${l?.[22]?.[0]}${l?.[22]?.[1]} ${l?.[3]}->${l?.[6]}`) },
+    // The previous text-search URL did not preserve the requested adult count.
+    link: null,
+    raw: {
+      flights: legs.map(leg => `${leg?.[22]?.[0] ?? ''}${leg?.[22]?.[1] ?? ''} ${leg[3]}->${leg[6]}`),
+      segments,
+      query_adults: query.adults,
+      itinerary_complete: !query.returnDate,
+      price_scope: query.returnDate ? 'round_trip_preview' : 'one_way_total',
+    },
   };
 }
 
@@ -164,15 +240,7 @@ export const google: PriceProvider = {
       throw new ProviderError((err as Error).message, 'google');
     }
 
-    let flights: any[];
-    try {
-      flights = parseResponse(text);
-    } catch (err) {
-      if (err instanceof ProviderError) throw err;
-      throw new ProviderError(`resposta ilegivel: ${(err as Error).message}`, 'google');
-    }
-
-    const link = searchLink(query);
-    return flights.map((f) => toOffer(f, link)).filter((o): o is Offer => o !== null);
+    const flights = parseResponse(text);
+    return flights.map(flight => toOffer(flight, query));
   },
 };

@@ -28,6 +28,7 @@ export interface Offer {
   raw: unknown;
   /** Preenchido pelo orquestrador: qual provedor trouxe esta oferta. */
   source?: string;
+  warnings?: string[];
   /**
    * Data que foi consultada para achar esta oferta. Serve de rede quando o
    * provedor nao informa `departAt` e, sem isso, nao daria para saber a que dia
@@ -107,7 +108,8 @@ export type FetchOptions = RequestInit & { timeoutMs?: number; retries?: number 
  * do HTML da pagina — nem toda porta de entrada de provedor e uma API.
  */
 export async function fetchComRetentativa(url: string, init: FetchOptions = {}): Promise<Response> {
-  const { timeoutMs = 20_000, retries = config.providers.retries, ...rest } = init;
+  const { timeoutMs: requestedTimeout = config.providers.timeoutMs, retries = config.providers.retries, ...rest } = init;
+  const timeoutMs = Math.min(requestedTimeout, config.providers.timeoutMs);
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -129,7 +131,9 @@ export async function fetchComRetentativa(url: string, init: FetchOptions = {}):
         throw new Error(`HTTP ${res.status} ${res.statusText} ${body.slice(0, 300)}`);
       }
 
-      return res;
+      // Consume the body before clearing the deadline; headers alone are insufficient.
+      const body = await res.arrayBuffer();
+      return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
     } catch (err) {
       lastError = err;
       // AbortError e erro de rede sao retentaveis; 4xx acima ja foi lancado.

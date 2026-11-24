@@ -1,0 +1,581 @@
+{
+  "upstream": "ManoelDiniz/monitor-passagens",
+  "upstream_commit": "2bc3243117f36ab93beeeb57119c16aaa286eaec",
+  "executed_at": "2026-11-24T16:24:46.154Z",
+  "input": {
+    "origins": [
+      "CNF"
+    ],
+    "destinations": [
+      "REC"
+    ],
+    "departure_date": "2027-03-10",
+    "return_date": "2027-03-17",
+    "passengers": {
+      "adults": 2
+    },
+    "providers": [
+      "kiwi",
+      "maxmilhas",
+      "google"
+    ],
+    "max_stops": 2,
+    "max_routes": 1,
+    "cursor": 0
+  },
+  "status": "partial",
+  "query_results": [
+    {
+      "provider": "kiwi",
+      "kind": "round_trip",
+      "status": "ok",
+      "valid_offers": 30,
+      "rejected_offers": 0,
+      "warnings": [],
+      "cheapest": {
+        "id": "582d4f4c14dc8320799fc1b4",
+        "source": "kiwi",
+        "retrieved_at": "2026-11-24T16:24:12.628Z",
+        "price": {
+          "amount_minor": 268400,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "CNF",
+              "to": "CGH",
+              "departure": "2027-03-10T15:05:00",
+              "arrival": "2027-03-10T16:30:00",
+              "carrier": "G3"
+            },
+            {
+              "from": "CGH",
+              "to": "REC",
+              "departure": "2027-03-10T17:30:00",
+              "arrival": "2027-03-10T20:35:00",
+              "carrier": "AD"
+            }
+          ],
+          "inbound": [
+            {
+              "from": "REC",
+              "to": "BSB",
+              "departure": "2027-03-17T11:10:00",
+              "arrival": "2027-03-17T13:50:00",
+              "carrier": "LA"
+            },
+            {
+              "from": "BSB",
+              "to": "CNF",
+              "departure": "2027-03-17T14:50:00",
+              "arrival": "2027-03-17T16:10:00",
+              "carrier": "AD"
+            }
+          ],
+          "complete": true,
+          "time_basis": "airport_local"
+        },
+        "airlines": [
+          "G3",
+          "AD",
+          "LA"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": 0,
+          "payment": "unspecified",
+          "taxes_included": null,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": true,
+        "booking_confirmed": false,
+        "link": null,
+        "warnings": [
+          "Connections may involve separate tickets; transfer protection is not verified."
+        ]
+      },
+      "error": null
+    },
+    {
+      "provider": "kiwi",
+      "kind": "outbound_one_way",
+      "status": "ok",
+      "valid_offers": 30,
+      "rejected_offers": 0,
+      "warnings": [],
+      "cheapest": {
+        "id": "7c0bafdab65ecf6b0e9e015b",
+        "source": "kiwi",
+        "retrieved_at": "2026-11-24T16:24:13.224Z",
+        "price": {
+          "amount_minor": 129900,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "CNF",
+              "to": "BSB",
+              "departure": "2027-03-10T12:50:00",
+              "arrival": "2027-03-10T14:10:00",
+              "carrier": "AD"
+            },
+            {
+              "from": "BSB",
+              "to": "REC",
+              "departure": "2027-03-10T18:50:00",
+              "arrival": "2027-03-10T21:25:00",
+              "carrier": "AD"
+            }
+          ],
+          "inbound": [],
+          "complete": true,
+          "time_basis": "airport_local"
+        },
+        "airlines": [
+          "AD"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": 0,
+          "payment": "unspecified",
+          "taxes_included": null,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": true,
+        "booking_confirmed": false,
+        "link": null,
+        "warnings": [
+          "Connections may involve separate tickets; transfer protection is not verified."
+        ]
+      },
+      "error": null
+    },
+    {
+      "provider": "kiwi",
+      "kind": "inbound_one_way",
+      "status": "partial",
+      "valid_offers": 28,
+      "rejected_offers": 2,
+      "warnings": [
+        "Airport change in connection requires manual review"
+      ],
+      "cheapest": {
+        "id": "3208af79036373e1061da1e3",
+        "source": "kiwi",
+        "retrieved_at": "2026-11-24T16:24:13.898Z",
+        "price": {
+          "amount_minor": 119300,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "REC",
+              "to": "BSB",
+              "departure": "2027-03-17T11:10:00",
+              "arrival": "2027-03-17T13:50:00",
+              "carrier": "LA"
+            },
+            {
+              "from": "BSB",
+              "to": "CNF",
+              "departure": "2027-03-17T19:20:00",
+              "arrival": "2027-03-17T20:35:00",
+              "carrier": "AD"
+            }
+          ],
+          "inbound": [],
+          "complete": true,
+          "time_basis": "airport_local"
+        },
+        "airlines": [
+          "LA",
+          "AD"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": 0,
+          "payment": "unspecified",
+          "taxes_included": null,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": true,
+        "booking_confirmed": false,
+        "link": null,
+        "warnings": [
+          "Connections may involve separate tickets; transfer protection is not verified."
+        ]
+      },
+      "error": null
+    },
+    {
+      "provider": "maxmilhas",
+      "kind": "round_trip",
+      "status": "partial",
+      "valid_offers": 153,
+      "rejected_offers": 34,
+      "warnings": [
+        "Airport change in connection requires manual review"
+      ],
+      "cheapest": {
+        "id": "2fb7fa151cc6d625fbcd6009",
+        "source": "maxmilhas",
+        "retrieved_at": "2026-11-24T16:24:31.799Z",
+        "price": {
+          "amount_minor": 256810,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "CNF",
+              "to": "REC",
+              "departure": "2027-03-10T12:55:00Z",
+              "arrival": "2027-03-10T15:20:00Z",
+              "carrier": "AD"
+            }
+          ],
+          "inbound": [
+            {
+              "from": "REC",
+              "to": "CNF",
+              "departure": "2027-03-17T02:40:00Z",
+              "arrival": "2027-03-17T05:15:00Z",
+              "carrier": "AD"
+            }
+          ],
+          "complete": true,
+          "time_basis": "provider_unverified_timezone"
+        },
+        "airlines": [
+          "AD"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": 0,
+          "payment": "PIX",
+          "taxes_included": true,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": true,
+        "booking_confirmed": false,
+        "link": "https://www.maxmilhas.com.br/busca-passagens-aereas/RT/CNF/REC/2027-03-10/2027-03-17/2/0/0/EC",
+        "warnings": [
+          "Provider timestamps retain their original format; displayed local times may carry a Z suffix."
+        ]
+      },
+      "error": null
+    },
+    {
+      "provider": "maxmilhas",
+      "kind": "outbound_one_way",
+      "status": "partial",
+      "valid_offers": 20,
+      "rejected_offers": 5,
+      "warnings": [
+        "Airport change in connection requires manual review"
+      ],
+      "cheapest": {
+        "id": "15fef0451b6c9ad754fc6fe1",
+        "source": "maxmilhas",
+        "retrieved_at": "2026-11-24T16:24:39.784Z",
+        "price": {
+          "amount_minor": 130150,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "CNF",
+              "to": "REC",
+              "departure": "2027-03-10T12:55:00Z",
+              "arrival": "2027-03-10T15:20:00Z",
+              "carrier": "AD"
+            }
+          ],
+          "inbound": [],
+          "complete": true,
+          "time_basis": "provider_unverified_timezone"
+        },
+        "airlines": [
+          "AD"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": 0,
+          "payment": "PIX",
+          "taxes_included": true,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": true,
+        "booking_confirmed": false,
+        "link": "https://www.maxmilhas.com.br/busca-passagens-aereas/OW/CNF/REC/2027-03-10/2/0/0/EC",
+        "warnings": [
+          "Provider timestamps retain their original format; displayed local times may carry a Z suffix."
+        ]
+      },
+      "error": null
+    },
+    {
+      "provider": "maxmilhas",
+      "kind": "inbound_one_way",
+      "status": "partial",
+      "valid_offers": 29,
+      "rejected_offers": 3,
+      "warnings": [
+        "Airport change in connection requires manual review"
+      ],
+      "cheapest": {
+        "id": "21059653c0bf5100f5a86cbd",
+        "source": "maxmilhas",
+        "retrieved_at": "2026-11-24T16:24:45.344Z",
+        "price": {
+          "amount_minor": 127660,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "REC",
+              "to": "CNF",
+              "departure": "2027-03-17T02:40:00Z",
+              "arrival": "2027-03-17T05:15:00Z",
+              "carrier": "AD"
+            }
+          ],
+          "inbound": [],
+          "complete": true,
+          "time_basis": "provider_unverified_timezone"
+        },
+        "airlines": [
+          "AD"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": 0,
+          "payment": "PIX",
+          "taxes_included": true,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": true,
+        "booking_confirmed": false,
+        "link": "https://www.maxmilhas.com.br/busca-passagens-aereas/OW/REC/CNF/2027-03-17/2/0/0/EC",
+        "warnings": [
+          "Provider timestamps retain their original format; displayed local times may carry a Z suffix."
+        ]
+      },
+      "error": null
+    },
+    {
+      "provider": "google",
+      "kind": "round_trip",
+      "status": "partial",
+      "valid_offers": 12,
+      "rejected_offers": 0,
+      "warnings": [],
+      "cheapest": {
+        "id": "5d29b96697a757c58597e0a1",
+        "source": "google",
+        "retrieved_at": "2026-11-24T16:24:45.684Z",
+        "price": {
+          "amount_minor": 311900,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "CNF",
+              "to": "REC",
+              "departure": "2027-03-10T12:55:00",
+              "arrival": "2027-03-10T15:20:00",
+              "carrier": "AD"
+            }
+          ],
+          "inbound": [],
+          "complete": false,
+          "time_basis": "airport_local"
+        },
+        "airlines": [
+          "AD"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": null,
+          "payment": "unspecified",
+          "taxes_included": null,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": false,
+        "booking_confirmed": false,
+        "link": null,
+        "warnings": [
+          "Return flight is not selected: Google round-trip price is indicative and excluded from comparisons."
+        ]
+      },
+      "error": null
+    },
+    {
+      "provider": "google",
+      "kind": "outbound_one_way",
+      "status": "ok",
+      "valid_offers": 13,
+      "rejected_offers": 0,
+      "warnings": [],
+      "cheapest": {
+        "id": "319dc3e3d452008d2e0054d7",
+        "source": "google",
+        "retrieved_at": "2026-11-24T16:24:45.888Z",
+        "price": {
+          "amount_minor": 149300,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "CNF",
+              "to": "CGH",
+              "departure": "2027-03-10T17:05:00",
+              "arrival": "2027-03-10T18:30:00",
+              "carrier": "LA"
+            },
+            {
+              "from": "CGH",
+              "to": "REC",
+              "departure": "2027-03-10T20:10:00",
+              "arrival": "2027-03-10T23:15:00",
+              "carrier": "LA"
+            }
+          ],
+          "inbound": [],
+          "complete": true,
+          "time_basis": "airport_local"
+        },
+        "airlines": [
+          "LA"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": null,
+          "payment": "unspecified",
+          "taxes_included": null,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": true,
+        "booking_confirmed": false,
+        "link": null,
+        "warnings": []
+      },
+      "error": null
+    },
+    {
+      "provider": "google",
+      "kind": "inbound_one_way",
+      "status": "ok",
+      "valid_offers": 10,
+      "rejected_offers": 0,
+      "warnings": [],
+      "cheapest": {
+        "id": "d3427706e177aba3d5d6e864",
+        "source": "google",
+        "retrieved_at": "2026-11-24T16:24:46.153Z",
+        "price": {
+          "amount_minor": 164800,
+          "currency": "BRL",
+          "scope": "all_passengers",
+          "adults": 2
+        },
+        "itinerary": {
+          "outbound": [
+            {
+              "from": "REC",
+              "to": "CNF",
+              "departure": "2027-03-17T02:40:00",
+              "arrival": "2027-03-17T05:15:00",
+              "carrier": "AD"
+            }
+          ],
+          "inbound": [],
+          "complete": true,
+          "time_basis": "airport_local"
+        },
+        "airlines": [
+          "AD"
+        ],
+        "conditions": {
+          "cabin": "ECONOMY",
+          "checked_bags": null,
+          "payment": "unspecified",
+          "taxes_included": null,
+          "transfer_protection": "unknown"
+        },
+        "comparison_eligible": true,
+        "booking_confirmed": false,
+        "link": null,
+        "warnings": []
+      },
+      "error": null
+    }
+  ],
+  "comparison": {
+    "level": "observed_price_only",
+    "currency": "BRL",
+    "conditions_comparable": false,
+    "exhaustive": false,
+    "round_trip": {
+      "quote_id": "2fb7fa151cc6d625fbcd6009",
+      "total_minor": 256810
+    },
+    "separate": {
+      "outbound_quote_id": "7c0bafdab65ecf6b0e9e015b",
+      "inbound_quote_id": "3208af79036373e1061da1e3",
+      "total_minor": 249200,
+      "separate_bookings": true
+    },
+    "round_trip_minus_separate_minor": 7610,
+    "lower_observed_price": "separate",
+    "warning": "Prices may have different payment, baggage, connection and refund conditions. No global minimum or booking availability is guaranteed."
+  },
+  "live_json_sha256": "a7310c22be4c686522c184c509cca78536e884263fd2aa290c03811db7b2a575",
+  "browser_check": {
+    "provider": "maxmilhas",
+    "adults": 2,
+    "route": "CNF-REC",
+    "departure_date": "2027-03-10",
+    "return_date": "2027-03-17",
+    "total_brl": 2665.38,
+    "payment": "PIX",
+    "taxes_and_fees_brl": 201.38,
+    "outbound": "Azul CNF 12:55 REC 15:20",
+    "inbound": "Azul REC 02:40 CNF 05:15",
+    "note": "Conferência no navegador integrado na primeira rodada; tarifas da rodada final variaram."
+  },
+  "upstream_checks": {
+    "tests_passed": 114,
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed"
+  },
+  "trimmed_checks": {
+    "tests_passed": 46,
+    "typecheck": "passed",
+    "build": "passed"
+  }
+}

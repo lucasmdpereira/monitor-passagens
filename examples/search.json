@@ -1,0 +1,10 @@
+{
+  "origins": ["CNF"],
+  "destinations": ["REC"],
+  "departure_date": "2027-03-10",
+  "return_date": "2027-03-17",
+  "passengers": { "adults": 2 },
+  "providers": ["kiwi", "maxmilhas", "google"],
+  "max_stops": 2,
+  "max_routes": 1
+}

@@ -91,8 +91,22 @@ interface Segment {
   carrier?: { code?: string; name?: string };
 }
 
-const segmentsOf = (sector: any): Segment[] =>
-  (sector?.sectorSegments ?? []).map((s: any) => s.segment).filter(Boolean);
+function segmentsOf(sector: any): Segment[] {
+  if (!Array.isArray(sector?.sectorSegments)) {
+    throw new ProviderError('formato inesperado dos segmentos da oferta', 'kiwi');
+  }
+  return sector.sectorSegments.map((s: any) => s?.segment).filter(Boolean);
+}
+
+function brlPrice(price: any): number | null {
+  const amount = price?.amount;
+  if (typeof amount !== 'number' && typeof amount !== 'string') return null;
+  if (typeof price?.currency?.code !== 'string' || price.currency.code.trim().toUpperCase() !== 'BRL') {
+    return null;
+  }
+  const value = Number(amount);
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
 
 /** Companhias distintas do trecho: "LATAM" ou "GOL + Azul" quando ha conexao entre cias. */
 function carriersOf(segments: Segment[]): string | null {
@@ -102,7 +116,7 @@ function carriersOf(segments: Segment[]): string | null {
 
 function bookingLink(itinerary: any): string | null {
   const url = itinerary?.bookingOptions?.edges?.[0]?.node?.bookingUrl;
-  if (!url) return null;
+  if (typeof url !== 'string' || !url) return null;
   return url.startsWith('http') ? url : `https://www.kiwi.com${url}`;
 }
 
@@ -186,22 +200,29 @@ export const kiwi: PriceProvider = {
       throw new ProviderError(`${result.code}: ${result.message}`, 'kiwi');
     }
 
-    const itineraries: any[] = result?.itineraries ?? [];
+    if (result?.__typename !== 'Itineraries' || !Array.isArray(result.itineraries)) {
+      throw new ProviderError('formato inesperado dos resultados da Kiwi', 'kiwi');
+    }
+    const itineraries: any[] = result.itineraries;
 
-    return itineraries
-      .filter((it) => it?.price?.amount)
-      .map<Offer>((it) => {
+    const offers = itineraries
+      .map((it): Offer | null => {
+        if (!it || typeof it !== 'object' || Array.isArray(it) || !it.price || typeof it.price !== 'object') {
+          throw new ProviderError('formato inesperado de uma oferta da Kiwi', 'kiwi');
+        }
+        const price = brlPrice(it.price);
+        if (price === null) return null;
         const outSegments = segmentsOf(roundTrip ? it.outbound : it.sector);
         const inSegments = roundTrip ? segmentsOf(it.inbound) : [];
         const checked = it.bagsInfo?.includedCheckedBags;
 
         return {
           // O preco ja vem total para todos os passageiros.
-          price: Number(it.price.amount),
-          currency: (it.price.currency?.code || 'BRL').toUpperCase(),
+          price,
+          currency: 'BRL',
           airline: carriersOf(outSegments),
           cabin: it.cabinClasses?.[0] ?? 'ECONOMY',
-          checkedBags: typeof checked === 'number' ? checked : null,
+          checkedBags: Number.isInteger(checked) && checked >= 0 ? checked : null,
           stopsOut: outSegments.length ? outSegments.length - 1 : null,
           stopsRet: inSegments.length ? inSegments.length - 1 : null,
           departAt: outSegments[0]?.source?.localTime ?? null,
@@ -209,6 +230,12 @@ export const kiwi: PriceProvider = {
           link: bookingLink(it),
           raw: it,
         };
-      });
+      })
+      .filter((offer): offer is Offer => offer !== null);
+
+    if (itineraries.length > 0 && offers.length === 0) {
+      throw new ProviderError('nenhuma oferta com preco positivo finito em BRL', 'kiwi');
+    }
+    return offers;
   },
 };
