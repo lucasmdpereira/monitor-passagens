@@ -15,6 +15,7 @@ import { fetchJson, fetchText, Offer, PriceProvider, ProviderError, SearchQuery 
 
 const SITE = 'https://www.maxmilhas.com.br';
 const BFF = 'https://bff-mall.maxmilhas.com.br';
+const ALLOWED_AIRLINES = new Set(['azul', 'gol', 'latam', 'mix']);
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
@@ -65,13 +66,17 @@ async function createIntention(url: string): Promise<Intention> {
     throw new ProviderError('__NEXT_DATA__ nao e JSON valido', 'maxmilhas');
   }
 
-  if (!intention?.id) {
+  if (typeof intention?.id !== 'string' || !intention.id.trim()) {
     throw new ProviderError('o site nao criou a busca (rota ou data invalida?)', 'maxmilhas');
   }
 
-  const airlines: string[] = (intention.airlines ?? [])
-    .filter((a: any) => a?.status?.enable && a.label)
-    .map((a: any) => a.label as string);
+  if (!Array.isArray(intention.airlines)) {
+    throw new ProviderError('formato inesperado da lista de companhias', 'maxmilhas');
+  }
+  const airlines = [...new Set<string>(intention.airlines
+    .filter((a: any) => a?.status?.enable === true && typeof a.label === 'string')
+    .map((a: any) => a.label.trim().toLowerCase())
+    .filter((label: string) => ALLOWED_AIRLINES.has(label)))];
 
   if (airlines.length === 0) {
     throw new ProviderError('nenhuma companhia habilitada para esta rota', 'maxmilhas');
@@ -81,7 +86,7 @@ async function createIntention(url: string): Promise<Intention> {
 }
 
 async function fetchAirline(id: string, airline: string, referer: string): Promise<any> {
-  return fetchJson(`${BFF}/search/air-offer/offers/${id}/${airline}`, {
+  return fetchJson(`${BFF}/search/air-offer/offers/${encodeURIComponent(id)}/${airline}`, {
     headers: {
       'User-Agent': UA,
       Accept: 'application/json, text/plain, */*',
@@ -113,27 +118,43 @@ const AIRLINE_NAMES: Record<string, string> = {
   AD: 'Azul',
 };
 
-function airlineName(code: string, dictionaries: any): string {
+function airlineName(code: unknown, dictionaries: any): string | null {
+  if (typeof code !== 'string' || !code) return null;
   const entry = dictionaries?.airline?.[code];
-  const raw = (typeof entry === 'string' ? entry : entry?.name) || code;
+  const name = typeof entry === 'string' ? entry : entry?.name;
+  const raw = typeof name === 'string' && name ? name : code;
   return AIRLINE_NAMES[raw] ?? AIRLINE_NAMES[code] ?? raw.replace(/\b[a-z]/g, (c: string) => c.toUpperCase());
 }
 
 function toOffer(raw: any, dictionaries: any, link: string): Offer | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)
+    || !raw.priceDetails || typeof raw.priceDetails !== 'object'
+    || !Array.isArray(raw.bounds) || !raw.bounds[0] || typeof raw.bounds[0] !== 'object') {
+    throw new ProviderError('formato inesperado de uma oferta da MaxMilhas', 'maxmilhas');
+  }
   const total = raw?.priceDetails?.totalPrices;
-  const out = raw?.bounds?.[0];
-  if (!total?.total || !out) return null;
+  const out = raw.bounds.find((bound: any) => bound?.number === 0);
+  if (!out) throw new ProviderError('oferta sem direcao de ida identificada', 'maxmilhas');
+  if (!total || typeof total !== 'object' || Array.isArray(total)) {
+    throw new ProviderError('formato inesperado do total da oferta', 'maxmilhas');
+  }
+  if (typeof total.total !== 'number' && typeof total.total !== 'string') return null;
+  const price = Number(total.total);
+  if (!Number.isFinite(price) || price <= 0
+    || typeof total.currencyCode !== 'string' || total.currencyCode.trim().toUpperCase() !== 'BRL') {
+    return null;
+  }
 
-  const back = raw.bounds[1];
+  const back = raw.bounds.find((bound: any) => bound?.number === 1);
   const code = out.carrier ?? out.validatedBy;
 
   return {
-    // Total ja consolidado para todos os passageiros da busca.
-    price: Number(total.total),
-    currency: (total.currencyCode || 'BRL').toUpperCase(),
+    // The group total already includes the discounts in raw.priceDetails.
+    price,
+    currency: 'BRL',
     airline: airlineName(code, dictionaries),
     cabin: CABIN[raw.cabin] ?? raw.cabin ?? 'ECONOMY',
-    checkedBags: out.hasCheckedBags ? 1 : 0,
+    checkedBags: typeof out.hasCheckedBags === 'boolean' ? (out.hasCheckedBags ? 1 : 0) : null,
     stopsOut: typeof out.totalStops === 'number' ? out.totalStops : null,
     stopsRet: back && typeof back.totalStops === 'number' ? back.totalStops : null,
     departAt: out.departure?.dateTime ?? null,
@@ -158,21 +179,33 @@ export const maxmilhas: PriceProvider = {
       intention.airlines.map(async (airline) => {
         try {
           const body = await fetchAirline(intention.id, airline, url);
-          const offers: any[] = body?.offers ?? [];
-          return offers
+          if (!Array.isArray(body?.offers)) {
+            throw new ProviderError('formato inesperado dos resultados da MaxMilhas', 'maxmilhas');
+          }
+          const rawOffers: any[] = body.offers;
+          const offers = rawOffers
             .map((o) => toOffer(o, body?.dictionaries, url))
             .filter((o): o is Offer => o !== null);
-        } catch {
-          // Uma companhia fora do ar nao invalida as outras.
-          return [];
+          if (rawOffers.length > 0 && offers.length === 0) {
+            throw new ProviderError('nenhuma oferta com preco positivo finito em BRL', 'maxmilhas');
+          }
+          return { offers, warning: null };
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          return { offers: [] as Offer[], warning: `maxmilhas/${airline}: ${message}` };
         }
       }),
     );
 
-    const all = perAirline.flat();
+    const all = perAirline.flatMap((result) => result.offers);
+    const warnings = perAirline.flatMap((result) => result.warning ? [result.warning] : []);
     if (all.length === 0) {
-      throw new ProviderError('nenhuma companhia retornou ofertas', 'maxmilhas');
+      if (warnings.length > 0) {
+        throw new ProviderError(`nenhuma companhia retornou ofertas: ${warnings.join(' | ')}`, 'maxmilhas');
+      }
+      return [];
     }
+    if (warnings.length > 0) for (const offer of all) offer.warnings = [...warnings];
     return all;
   },
 };

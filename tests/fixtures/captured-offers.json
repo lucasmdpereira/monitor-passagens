@@ -1,0 +1,830 @@
+{
+  "kiwi": {
+    "round-trip": {
+      "query": {
+        "origin": "CNF",
+        "destination": "REC",
+        "departDate": "2027-03-10",
+        "returnDate": "2027-03-17",
+        "adults": 2,
+        "maxStops": 2
+      },
+      "offer": {
+        "price": 2685,
+        "currency": "BRL",
+        "airline": "Gol Transportes Aéreos + Azul",
+        "cabin": "ECONOMY",
+        "checkedBags": 0,
+        "stopsOut": 1,
+        "stopsRet": 1,
+        "departAt": "2027-03-10T15:05:00",
+        "returnAt": "2027-03-17T11:10:00",
+        "link": "https://www.kiwi.com/en/booking/?passengers=2-0-0",
+        "raw": {
+          "cabinClasses": [
+            "ECONOMY"
+          ],
+          "price": {
+            "amount": "2685",
+            "currency": {
+              "code": "BRL"
+            }
+          },
+          "bagsInfo": {
+            "includedCheckedBags": 0,
+            "includedHandBags": 2
+          },
+          "outbound": {
+            "sectorSegments": [
+              {
+                "segment": {
+                  "source": {
+                    "localTime": "2027-03-10T15:05:00",
+                    "station": {
+                      "code": "CNF"
+                    }
+                  },
+                  "destination": {
+                    "localTime": "2027-03-10T16:30:00",
+                    "station": {
+                      "code": "CGH"
+                    }
+                  },
+                  "carrier": {
+                    "code": "G3",
+                    "name": "Gol Transportes Aéreos"
+                  }
+                }
+              },
+              {
+                "segment": {
+                  "source": {
+                    "localTime": "2027-03-10T17:30:00",
+                    "station": {
+                      "code": "CGH"
+                    }
+                  },
+                  "destination": {
+                    "localTime": "2027-03-10T20:35:00",
+                    "station": {
+                      "code": "REC"
+                    }
+                  },
+                  "carrier": {
+                    "code": "AD",
+                    "name": "Azul"
+                  }
+                }
+              }
+            ]
+          },
+          "inbound": {
+            "sectorSegments": [
+              {
+                "segment": {
+                  "source": {
+                    "localTime": "2027-03-17T11:10:00",
+                    "station": {
+                      "code": "REC"
+                    }
+                  },
+                  "destination": {
+                    "localTime": "2027-03-17T13:50:00",
+                    "station": {
+                      "code": "BSB"
+                    }
+                  },
+                  "carrier": {
+                    "code": "LA",
+                    "name": "LATAM Airlines"
+                  }
+                }
+              },
+              {
+                "segment": {
+                  "source": {
+                    "localTime": "2027-03-17T14:50:00",
+                    "station": {
+                      "code": "BSB"
+                    }
+                  },
+                  "destination": {
+                    "localTime": "2027-03-17T16:10:00",
+                    "station": {
+                      "code": "CNF"
+                    }
+                  },
+                  "carrier": {
+                    "code": "AD",
+                    "name": "Azul"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "outbound": {
+      "query": {
+        "origin": "CNF",
+        "destination": "REC",
+        "departDate": "2027-03-10",
+        "returnDate": null,
+        "adults": 2,
+        "maxStops": 2
+      },
+      "offer": {
+        "price": 1308,
+        "currency": "BRL",
+        "airline": "Azul",
+        "cabin": "ECONOMY",
+        "checkedBags": 0,
+        "stopsOut": 1,
+        "stopsRet": null,
+        "departAt": "2027-03-10T12:50:00",
+        "returnAt": null,
+        "link": "https://www.kiwi.com/en/booking/?passengers=2-0-0",
+        "raw": {
+          "cabinClasses": [
+            "ECONOMY"
+          ],
+          "price": {
+            "amount": "1308",
+            "currency": {
+              "code": "BRL"
+            }
+          },
+          "bagsInfo": {
+            "includedCheckedBags": 0,
+            "includedHandBags": 2
+          },
+          "sector": {
+            "sectorSegments": [
+              {
+                "segment": {
+                  "source": {
+                    "localTime": "2027-03-10T12:50:00",
+                    "station": {
+                      "code": "CNF"
+                    }
+                  },
+                  "destination": {
+                    "localTime": "2027-03-10T14:10:00",
+                    "station": {
+                      "code": "BSB"
+                    }
+                  },
+                  "carrier": {
+                    "code": "AD",
+                    "name": "Azul"
+                  }
+                }
+              },
+              {
+                "segment": {
+                  "source": {
+                    "localTime": "2027-03-10T18:50:00",
+                    "station": {
+                      "code": "BSB"
+                    }
+                  },
+                  "destination": {
+                    "localTime": "2027-03-10T21:25:00",
+                    "station": {
+                      "code": "REC"
+                    }
+                  },
+                  "carrier": {
+                    "code": "AD",
+                    "name": "Azul"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "inbound": {
+      "query": {
+        "origin": "REC",
+        "destination": "CNF",
+        "departDate": "2027-03-17",
+        "returnDate": null,
+        "adults": 2,
+        "maxStops": 2
+      },
+      "offer": {
+        "price": 1193,
+        "currency": "BRL",
+        "airline": "LATAM Airlines + Azul",
+        "cabin": "ECONOMY",
+        "checkedBags": 0,
+        "stopsOut": 1,
+        "stopsRet": null,
+        "departAt": "2027-03-17T11:10:00",
+        "returnAt": null,
+        "link": "https://www.kiwi.com/en/booking/?passengers=2-0-0",
+        "raw": {
+          "cabinClasses": [
+            "ECONOMY"
+          ],
+          "price": {
+            "amount": "1193",
+            "currency": {
+              "code": "BRL"
+            }
+          },
+          "bagsInfo": {
+            "includedCheckedBags": 0,
+            "includedHandBags": 2
+          },
+          "sector": {
+            "sectorSegments": [
+              {
+                "segment": {
+                  "source": {
+                    "localTime": "2027-03-17T11:10:00",
+                    "station": {
+                      "code": "REC"
+                    }
+                  },
+                  "destination": {
+                    "localTime": "2027-03-17T13:50:00",
+                    "station": {
+                      "code": "BSB"
+                    }
+                  },
+                  "carrier": {
+                    "code": "LA",
+                    "name": "LATAM Airlines"
+                  }
+                }
+              },
+              {
+                "segment": {
+                  "source": {
+                    "localTime": "2027-03-17T19:20:00",
+                    "station": {
+                      "code": "BSB"
+                    }
+                  },
+                  "destination": {
+                    "localTime": "2027-03-17T20:35:00",
+                    "station": {
+                      "code": "CNF"
+                    }
+                  },
+                  "carrier": {
+                    "code": "AD",
+                    "name": "Azul"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "maxmilhas": {
+    "round-trip": {
+      "query": {
+        "origin": "CNF",
+        "destination": "REC",
+        "departDate": "2027-03-10",
+        "returnDate": "2027-03-17",
+        "adults": 2,
+        "maxStops": 2
+      },
+      "offer": {
+        "price": 2665.38,
+        "currency": "BRL",
+        "airline": "Azul",
+        "cabin": "ECONOMY",
+        "checkedBags": 0,
+        "stopsOut": 0,
+        "stopsRet": 0,
+        "departAt": "2027-03-10T12:55:00Z",
+        "returnAt": "2027-03-17T02:40:00Z",
+        "link": "https://www.maxmilhas.com.br/busca-passagens-aereas/RT/CNF/REC/2027-03-10/2027-03-17/2/0/0/EC",
+        "raw": {
+          "type": "miles",
+          "priceDetails": {
+            "unitPrices": [
+              {
+                "paxTaxesBreakdown": [
+                  {
+                    "code": "BOARDING_TAX",
+                    "currencyCode": "BRL",
+                    "amount": 35.15,
+                    "boundNumber": 0
+                  },
+                  {
+                    "code": "BOARDING_TAX",
+                    "currencyCode": "BRL",
+                    "amount": 60.54,
+                    "boundNumber": 1
+                  }
+                ],
+                "paxFeesBreakdown": [
+                  {
+                    "code": "2273",
+                    "currencyCode": "BRL",
+                    "amount": 2.5,
+                    "boundNumber": 0
+                  },
+                  {
+                    "code": "2273",
+                    "currencyCode": "BRL",
+                    "amount": 2.5,
+                    "boundNumber": 1
+                  }
+                ],
+                "discounts": [
+                  {
+                    "discountOptions": [],
+                    "code": "SCROOGE_DISCOUNT",
+                    "type": "DISCOUNT",
+                    "currencyCode": "BRL",
+                    "amount": 86.64,
+                    "target": "TICKET_FARE",
+                    "label": "no PIX",
+                    "boundNumber": 0,
+                    "name": "pix",
+                    "percentage": 12
+                  },
+                  {
+                    "discountOptions": [],
+                    "code": "SCROOGE_DISCOUNT",
+                    "type": "DISCOUNT",
+                    "currencyCode": "BRL",
+                    "amount": 81.36,
+                    "target": "TICKET_FARE",
+                    "label": "no PIX",
+                    "boundNumber": 1,
+                    "name": "pix",
+                    "percentage": 12
+                  }
+                ],
+                "passengerTypeCode": "ADT",
+                "currencyCode": "BRL",
+                "paxBaseAmount": 1400,
+                "paxTotalTaxes": 95.69,
+                "paxTotalAmount": 1332.69,
+                "paxTotalFees": 5,
+                "paxTotalDiscounts": 168
+              }
+            ],
+            "totalPrices": {
+              "base": 2800,
+              "total": 2665.38,
+              "currencyCode": "BRL",
+              "totalTaxes": 191.38,
+              "totalFees": 10,
+              "totalDiscounts": 336
+            },
+            "offerPriceWeight": {
+              "code": "",
+              "value": 2665.38
+            },
+            "economy": {
+              "airline": {
+                "amount": 242.96000000000004,
+                "currencyCode": "BRL",
+                "percentage": 7
+              },
+              "airlineWithDiscounts": {
+                "amount": 578.96,
+                "currencyCode": "BRL",
+                "percentage": 18
+              }
+            }
+          },
+          "bounds": [
+            {
+              "id": "12a0d0710a21cd35449d113fbcd727b3",
+              "number": 0,
+              "fareProfile": {
+                "baggageAllowance": [
+                  "CARRYON10X1"
+                ],
+                "fareRules": [],
+                "marketingName": ""
+              },
+              "carrier": "AD",
+              "validatedBy": "AD",
+              "duration": "PT2H25M",
+              "daysDifference": 0,
+              "departure": {
+                "locationCode": "CNF",
+                "dateTime": "2027-03-10T12:55:00Z",
+                "terminal": ""
+              },
+              "arrival": {
+                "locationCode": "REC",
+                "dateTime": "2027-03-10T15:20:00Z",
+                "terminal": ""
+              },
+              "totalStops": 0,
+              "hasCheckedBags": false,
+              "hasCarryOnBags": true,
+              "segments": [
+                {
+                  "stops": [],
+                  "marketingAirlineCode": "AD",
+                  "operatingAirlineCode": "AD",
+                  "marketingFlightNumber": "4890",
+                  "operatingFlightNumber": "4890",
+                  "departure": {
+                    "locationCode": "CNF",
+                    "dateTime": "2027-03-10T12:55:00Z",
+                    "terminal": ""
+                  },
+                  "arrival": {
+                    "locationCode": "REC",
+                    "dateTime": "2027-03-10T15:20:00Z",
+                    "terminal": ""
+                  },
+                  "duration": "PT2H25M",
+                  "stopQuantity": 0,
+                  "equipment": null,
+                  "id": "SEG-ADAD-4890-CNFREC-2027-03-10-1255",
+                  "cabin": "EC",
+                  "bookingClass": "",
+                  "fareClass": "",
+                  "fareBasis": ""
+                }
+              ],
+              "type": "miles",
+              "cabin": "EC"
+            },
+            {
+              "id": "ea973ffff791ca78f0301cedf936b012",
+              "number": 1,
+              "fareProfile": {
+                "baggageAllowance": [
+                  "CARRYON10X1"
+                ],
+                "fareRules": [],
+                "marketingName": ""
+              },
+              "carrier": "AD",
+              "validatedBy": "AD",
+              "duration": "PT2H35M",
+              "daysDifference": 0,
+              "departure": {
+                "locationCode": "REC",
+                "dateTime": "2027-03-17T02:40:00Z",
+                "terminal": ""
+              },
+              "arrival": {
+                "locationCode": "CNF",
+                "dateTime": "2027-03-17T05:15:00Z",
+                "terminal": ""
+              },
+              "totalStops": 0,
+              "hasCheckedBags": false,
+              "hasCarryOnBags": true,
+              "segments": [
+                {
+                  "stops": [],
+                  "marketingAirlineCode": "AD",
+                  "operatingAirlineCode": "AD",
+                  "marketingFlightNumber": "4605",
+                  "operatingFlightNumber": "4605",
+                  "departure": {
+                    "locationCode": "REC",
+                    "dateTime": "2027-03-17T02:40:00Z",
+                    "terminal": ""
+                  },
+                  "arrival": {
+                    "locationCode": "CNF",
+                    "dateTime": "2027-03-17T05:15:00Z",
+                    "terminal": ""
+                  },
+                  "duration": "PT2H35M",
+                  "stopQuantity": 0,
+                  "equipment": null,
+                  "id": "SEG-ADAD-4605-RECCNF-2027-03-17-0240",
+                  "cabin": "EC",
+                  "bookingClass": "",
+                  "fareClass": "",
+                  "fareBasis": ""
+                }
+              ],
+              "type": "miles",
+              "cabin": "EC"
+            }
+          ],
+          "cabin": "EC"
+        }
+      }
+    },
+    "outbound": {
+      "query": {
+        "origin": "CNF",
+        "destination": "REC",
+        "departDate": "2027-03-10",
+        "returnDate": null,
+        "adults": 2,
+        "maxStops": 2
+      },
+      "offer": {
+        "price": 1351.02,
+        "currency": "BRL",
+        "airline": "Azul",
+        "cabin": "ECONOMY",
+        "checkedBags": 0,
+        "stopsOut": 0,
+        "stopsRet": null,
+        "departAt": "2027-03-10T12:55:00Z",
+        "returnAt": null,
+        "link": "https://www.maxmilhas.com.br/busca-passagens-aereas/OW/CNF/REC/2027-03-10/2/0/0/EC",
+        "raw": {
+          "type": "miles",
+          "priceDetails": {
+            "unitPrices": [
+              {
+                "paxTaxesBreakdown": [
+                  {
+                    "code": "BOARDING_TAX",
+                    "currencyCode": "BRL",
+                    "amount": 35.15,
+                    "boundNumber": 0
+                  }
+                ],
+                "paxFeesBreakdown": [
+                  {
+                    "code": "2273",
+                    "currencyCode": "BRL",
+                    "amount": 5,
+                    "boundNumber": 0
+                  }
+                ],
+                "discounts": [
+                  {
+                    "discountOptions": [],
+                    "code": "SCROOGE_DISCOUNT",
+                    "type": "DISCOUNT",
+                    "currencyCode": "BRL",
+                    "amount": 86.64,
+                    "target": "TICKET_FARE",
+                    "label": "no PIX",
+                    "boundNumber": 0,
+                    "name": "pix",
+                    "percentage": 12
+                  }
+                ],
+                "passengerTypeCode": "ADT",
+                "currencyCode": "BRL",
+                "paxBaseAmount": 722,
+                "paxTotalTaxes": 35.15,
+                "paxTotalAmount": 675.51,
+                "paxTotalFees": 5,
+                "paxTotalDiscounts": 86.64
+              }
+            ],
+            "totalPrices": {
+              "base": 1444,
+              "total": 1351.02,
+              "currencyCode": "BRL",
+              "totalTaxes": 70.3,
+              "totalFees": 10,
+              "totalDiscounts": 173.28
+            },
+            "offerPriceWeight": {
+              "code": "",
+              "value": 1351.02
+            },
+            "economy": {
+              "airline": {
+                "amount": 72.48000000000002,
+                "currencyCode": "BRL",
+                "percentage": 5
+              },
+              "airlineWithDiscounts": {
+                "amount": 245.76,
+                "currencyCode": "BRL",
+                "percentage": 15
+              }
+            }
+          },
+          "bounds": [
+            {
+              "id": "12a0d0710a21cd35449d113fbcd727b3",
+              "number": 0,
+              "fareProfile": {
+                "baggageAllowance": [
+                  "CARRYON10X1"
+                ],
+                "fareRules": [],
+                "marketingName": ""
+              },
+              "carrier": "AD",
+              "validatedBy": "AD",
+              "duration": "PT2H25M",
+              "daysDifference": 0,
+              "departure": {
+                "locationCode": "CNF",
+                "dateTime": "2027-03-10T12:55:00Z",
+                "terminal": ""
+              },
+              "arrival": {
+                "locationCode": "REC",
+                "dateTime": "2027-03-10T15:20:00Z",
+                "terminal": ""
+              },
+              "totalStops": 0,
+              "hasCheckedBags": false,
+              "hasCarryOnBags": true,
+              "segments": [
+                {
+                  "stops": [],
+                  "marketingAirlineCode": "AD",
+                  "operatingAirlineCode": "AD",
+                  "marketingFlightNumber": "4890",
+                  "operatingFlightNumber": "4890",
+                  "departure": {
+                    "locationCode": "CNF",
+                    "dateTime": "2027-03-10T12:55:00Z",
+                    "terminal": ""
+                  },
+                  "arrival": {
+                    "locationCode": "REC",
+                    "dateTime": "2027-03-10T15:20:00Z",
+                    "terminal": ""
+                  },
+                  "duration": "PT2H25M",
+                  "stopQuantity": 0,
+                  "equipment": null,
+                  "id": "SEG-ADAD-4890-CNFREC-2027-03-10-1255",
+                  "cabin": "EC",
+                  "bookingClass": "",
+                  "fareClass": "",
+                  "fareBasis": ""
+                }
+              ],
+              "type": "miles",
+              "cabin": "EC"
+            }
+          ],
+          "cabin": "EC"
+        }
+      }
+    },
+    "inbound": {
+      "query": {
+        "origin": "REC",
+        "destination": "CNF",
+        "departDate": "2027-03-17",
+        "returnDate": null,
+        "adults": 2,
+        "maxStops": 2
+      },
+      "offer": {
+        "price": 1324.36,
+        "currency": "BRL",
+        "airline": "Azul",
+        "cabin": "ECONOMY",
+        "checkedBags": 0,
+        "stopsOut": 0,
+        "stopsRet": null,
+        "departAt": "2027-03-17T02:40:00Z",
+        "returnAt": null,
+        "link": "https://www.maxmilhas.com.br/busca-passagens-aereas/OW/REC/CNF/2027-03-17/2/0/0/EC",
+        "raw": {
+          "type": "miles",
+          "priceDetails": {
+            "unitPrices": [
+              {
+                "paxTaxesBreakdown": [
+                  {
+                    "code": "BOARDING_TAX",
+                    "currencyCode": "BRL",
+                    "amount": 60.54,
+                    "boundNumber": 0
+                  }
+                ],
+                "paxFeesBreakdown": [
+                  {
+                    "code": "2273",
+                    "currencyCode": "BRL",
+                    "amount": 5,
+                    "boundNumber": 0
+                  }
+                ],
+                "discounts": [
+                  {
+                    "discountOptions": [],
+                    "code": "SCROOGE_DISCOUNT",
+                    "type": "DISCOUNT",
+                    "currencyCode": "BRL",
+                    "amount": 81.36,
+                    "target": "TICKET_FARE",
+                    "label": "no PIX",
+                    "boundNumber": 0,
+                    "name": "pix",
+                    "percentage": 12
+                  }
+                ],
+                "passengerTypeCode": "ADT",
+                "currencyCode": "BRL",
+                "paxBaseAmount": 678,
+                "paxTotalTaxes": 60.54,
+                "paxTotalAmount": 662.18,
+                "paxTotalFees": 5,
+                "paxTotalDiscounts": 81.36
+              }
+            ],
+            "totalPrices": {
+              "base": 1356,
+              "total": 1324.36,
+              "currencyCode": "BRL",
+              "totalTaxes": 121.08,
+              "totalFees": 10,
+              "totalDiscounts": 162.72
+            },
+            "offerPriceWeight": {
+              "code": "",
+              "value": 1324.36
+            },
+            "economy": {
+              "airline": {
+                "amount": 160.48000000000002,
+                "currencyCode": "BRL",
+                "percentage": 10
+              },
+              "airlineWithDiscounts": {
+                "amount": 323.20000000000005,
+                "currencyCode": "BRL",
+                "percentage": 20
+              }
+            }
+          },
+          "bounds": [
+            {
+              "id": "ea973ffff791ca78f0301cedf936b012",
+              "number": 0,
+              "fareProfile": {
+                "baggageAllowance": [
+                  "CARRYON10X1"
+                ],
+                "fareRules": [],
+                "marketingName": ""
+              },
+              "carrier": "AD",
+              "validatedBy": "AD",
+              "duration": "PT2H35M",
+              "daysDifference": 0,
+              "departure": {
+                "locationCode": "REC",
+                "dateTime": "2027-03-17T02:40:00Z",
+                "terminal": ""
+              },
+              "arrival": {
+                "locationCode": "CNF",
+                "dateTime": "2027-03-17T05:15:00Z",
+                "terminal": ""
+              },
+              "totalStops": 0,
+              "hasCheckedBags": false,
+              "hasCarryOnBags": true,
+              "segments": [
+                {
+                  "stops": [],
+                  "marketingAirlineCode": "AD",
+                  "operatingAirlineCode": "AD",
+                  "marketingFlightNumber": "4605",
+                  "operatingFlightNumber": "4605",
+                  "departure": {
+                    "locationCode": "REC",
+                    "dateTime": "2027-03-17T02:40:00Z",
+                    "terminal": ""
+                  },
+                  "arrival": {
+                    "locationCode": "CNF",
+                    "dateTime": "2027-03-17T05:15:00Z",
+                    "terminal": ""
+                  },
+                  "duration": "PT2H35M",
+                  "stopQuantity": 0,
+                  "equipment": null,
+                  "id": "SEG-ADAD-4605-RECCNF-2027-03-17-0240",
+                  "cabin": "EC",
+                  "bookingClass": "",
+                  "fareClass": "",
+                  "fareBasis": ""
+                }
+              ],
+              "type": "miles",
+              "cabin": "EC"
+            }
+          ],
+          "cabin": "EC"
+        }
+      }
+    }
+  }
+}
